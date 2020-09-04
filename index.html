@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+        integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
+    <title>Movie</title>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="index.html">TMDB</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" href="index.html">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <!--  Movie dropdown-->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Movies
+                    </a>
+                    <div class="dropdown-menu" id="movie-dropdown" aria-labelledby="navbarDropdown">
+                    </div>
+                </li>
+                <!-- TV dropdown-->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        TV
+                    </a>
+                    <div class="dropdown-menu" id="tv-dropdown" aria-labelledby="navbarDropdown">
+                    </div>
+                </li>
+                <!-- Actors/Actresses -->
+                <li class="nav-item active">
+                    <a class="nav-link" id="actorActresses" href="index.html">Actors/Actresses<span
+                            class="sr-only">(current)</span></a>
+                </li>
+                <!--About-->
+                <li class="nav-item active">
+                    <a class="nav-link" id="about" href="#">About <span class="sr-only">(current)</span></a>
+                </li>
+                <!--End of About-->
+                <!--Filter-->
+                <!--
+                <div class="dropright ml-2">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Filter
+                    </button>
+                    <form id="parentform">
+                        <div class="dropdown-menu px-3" aria-labelledby="dropdownMenu2">
+
+                            <input type="text" class="form-control" id="releaseDate" placeholder="Release Date">
+
+
+                            <div class="form-check float-left ml-1 mt-2">
+                                <input class="form-check-input" type="checkbox" value="top-rated" id="defaultCheck1"
+                                    checked>
+                                <label class="form-check-label" for="defaultCheck1">
+                                    Top Rated
+                                </label>
+                            </div>
+
+                            <form id="popularityForm">
+                                <div class="form-check float-left ml-1 mt-2">
+                                    <input class="form-check-input" type="radio" name="exampleRadios2"
+                                        id="exampleRadios1" value="lessPopular" checked>
+                                    <label class="form-check-label" for="exampleRadios1">
+                                        Most Popular
+                                    </label>
+                                </div>
+                                <div class="form-check float-left ml-1 mb-2">
+                                    <input class="form-check-input" type="radio" name="exampleRadios2"
+                                        id="exampleRadios2" value="mostPopular">
+                                    <label class="form-check-label" for="exampleRadios1">
+                                        Least Popular
+                                    </label>
+                                </div>
+                            </form>
+
+
+                            <form id="nowOrUpcoming">
+                                <div class="form-check float-left ml-1">
+                                    <input class="form-check-input" type="radio" name="exampleRadios"
+                                        id="exampleRadios3" value="nowPlaying" checked>
+                                    <label class="form-check-label" for="exampleRadios1">
+                                        Now Playing
+                                    </label>
+                                </div>
+                                <div class="form-check float-left ml-1">
+                                    <input class="form-check-input" type="radio" name="exampleRadios"
+                                        id="exampleRadios4" value="upcoming">
+                                    <label class="form-check-label" for="exampleRadios1">
+                                        Upcoming
+                                    </label>
+                                </div>
+                            </form>
+
+
+                        </div>
+                    </form>
+
+                </div>
+            -->
+                <!--End of Filter-->
+            </ul>
+            <!--Search-->
+            <form class="form-inline my-2 my-lg-0">
+                <input class="form-control mr-sm-2" id="searchBox" type="search" placeholder="Search"
+                    aria-label="Search">
+                <button class="btn btn-outline-success my-2 my-sm-0" id="searchButton" type="submit">Search</button>
+                <!--
+                
+            -->
+            </form>
+
+        </div>
+    </nav>
+    <div id="container" class="container">
+    </div>
+    <script src="./oop-script.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
+        crossorigin="anonymous"></script>
+</body>
+
+
+</html>
