@@ -14,57 +14,42 @@ class App {
 class APIService {
     static TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 
+    //bağlantılı radiolara aynı class ismini ver submite basıldıgında class içi loop dön checked attribute olanı type olarak kullan
 
 
+    static async fetchMovies(path = "movie", type = "now_playing") {
+        const url = APIService._constructUrl(`${path}/${type}`)
 
-    static async fetchMovies(type = "now_playing") {
-        const url = APIService._constructUrl(`movie/${type}`)
         const response = await fetch(url)
+        // #find-dropdown.addeventlistener{${e.target.value}}
+        //_constructUrl(path, ${e.target.value})
+
         const data = await response.json()
-        const detailedData = data.results.map(async x => await APIService.fetchMovie(x.id))
-        return Promise.all(detailedData)
+
+        return data.results.map(movie => new Movie(movie))
     }
-    static async fetchTVs(type = "now_playing") {
-        const url = APIService._constructUrl(`tv/${type}`)
-        const response = await fetch(url)
-        const data = await response.json()
-        const detailedData = data.results.map(async x => await APIService.fetchTV(x.id))
-        return Promise.all(detailedData)
-    }
-    static async fetchMovie(movieId) {
-        const url = APIService._constructUrl(`movie/${movieId}`, "&append_to_response=", "videos")
+    static async fetchMovie(path = "movie", movieId) {
+        const url = APIService._constructUrl(`${path}/${movieId}`, "&append_to_response=", "videos")
         const response = await fetch(url)
         const data = await response.json()
 
-        return new Movie(data)
-    }
-    static async fetchTV(tvId) {
-        const url = APIService._constructUrl(`tv/${tvId}`, "&append_to_response=", "videos")
-        const response = await fetch(url)
-        const data = await response.json()
-
-        return new TV(data)
-    }
-
-    static async fetchMovieCredits(movie) {
-        const url = APIService._constructUrl(`movie/${movie.id}/credits`)
-        const response = await fetch(url)
-        const data = await response.json()
+        //return new Movie(data)
         return data
     }
 
-    static async fetchTvCredits(tv) {
-        const url = APIService._constructUrl(`tv/${tv.id}/credits`)
+    static async fetchCredits(path, movie) {
+        const url = APIService._constructUrl(`${path}/${movie.id}/credits`)
         const response = await fetch(url)
         const data = await response.json()
         return data
     }
 
     static async fetchPersonCombinedCredits(personId) {
+        //https://api.themoviedb.org/3/person/976/combined_credits?api_key=50263a781de21add754e80576984b3e5&language=en-US
         const url = APIService._constructUrl(`person/${personId}/combined_credits`)
         const response = await fetch(url)
         const data = await response.json()
-        return data.cast.map(x => x.media_type === "tv" ? new TV(x) : new Movie(x))
+        return data.cast.map(x => new Movie(x))
     }
 
     static _constructUrl(path, append = "", item = "") {
@@ -79,20 +64,14 @@ class APIService {
         const queryResponse = await fetch(queryUrl)
         const queryData = await queryResponse.json()
 
-        const detailedQueryData = queryData.results.map(async x => {
-            if (x.media_type === "tv") {
-                return await APIService.fetchTV(x.id)
-            }
-            else if (x.media_type === "movie") {
-
-                return await APIService.fetchMovie(x.id)
+        return queryData.results.map(x => {
+            if (x.media_type === "tv" || x.media_type === "movie") {
+                return new Movie(x)
             }
             else {
-                return await APIService.fetchActor(x.id)
+                return new Person(x)
             }
         })
-
-        return Promise.all(detailedQueryData)
 
     }
 
@@ -106,36 +85,27 @@ class APIService {
         const response = await fetch(url)
         const data = await response.json()
 
-        const detailedData = data.results.map(async x => type === "movie" ? await APIService.fetchMovie(x.id) : await APIService.fetchTV(x.id))
-        return Promise.all(detailedData)
+        const detailedMovies = data.results.map(async x => {
+            const data2 = await APIService.fetchMovie(type, x.id)
+            console.log(data2)
+        })
+
+        //console.log(detailedMovies)
+
+        return data.results
+
     }
 
 
-    static async getSimilarMovies(movie) {
-        const url = APIService._constructUrl(`movie/${movie.id}/similar`, "&append_to_response=", "videos")
+    static async getSimilar(path, movie) {
+        const url = APIService._constructUrl(`${path}/${movie.id}/similar`, "&append_to_response=", "videos")
         const response = await fetch(url)
         const data = await response.json()
-        const detailedData = data.results.map(async x => APIService.fetchMovie(x.id))
-        return Promise.all(detailedData)
+        return data.results.map(x => new Movie(x))
     }
 
-    static async getSimilarTv(tv) {
-        const url = APIService._constructUrl(`tv/${tv.id}/similar`, "&append_to_response=", "videos")
-        const response = await fetch(url)
-        const data = await response.json()
-        const detailedData = data.results.map(async x => APIService.fetchTV(x.id))
-        return Promise.all(detailedData)
-    }
-
-    static async fetchMovieReviews(movie) {
-        const url = APIService._constructUrl(`movie/${movie.id}/reviews`)
-        const response = await fetch(url)
-        const data = await response.json()
-        return data
-    }
-
-    static async fetchTvReviews(tv) {
-        const url = APIService._constructUrl(`tv/${tv.id}/reviews`)
+    static async fetchReviews(path, movie) {
+        const url = APIService._constructUrl(`${path}/${movie.id}/reviews`)
         const response = await fetch(url)
         const data = await response.json()
         return data
@@ -159,8 +129,7 @@ class APIService {
         const url = APIService._constructUrl(`person/popular`, `&append_to_response=`, "birthday")
         const response = await fetch(url)
         const data = await response.json()
-        const detailedData = data.results.map(x => APIService.fetchActor(x.id))
-        return Promise.all(detailedData)
+        return data.results.map(x => new Person(x))
     }
 }
 
@@ -192,7 +161,6 @@ class HomePage {
         filterSearchButton.addEventListener("click", async (a) => {
             let path = ""
             let type = ""
-            let data = ""
             a.preventDefault()
             for (const each of paths) {
                 if (each.checked) {
@@ -202,32 +170,30 @@ class HomePage {
             }
             for (const each of types) {
                 if (each.checked) {
-                    type = each.id
+                    if (each.id === "releaseDate") {
+                        type = dateInput.value
+                        const data2 = await APIService.fetchFilter(type, "", path, "release_date.desc")
+                        const sortedDate = data2.map(x => new Movie(x))
+                        return HomePage.renderHomepageContent(sortedDate)
+                    }
+                    if (path === "tv") {
+                        if (each.id === "nowPlaying") {
+                            type = "airing_today"
+                        }
+                        else if (each.id === "upcoming") {
+                            type = "on_the_air"
+                        }
+                        else {
+                            type = each.value
+                        }
+                    }
+                    else {
+                        type = each.value
+                    }
+                    const data = await APIService.fetchMovies(path, type)
+                    return HomePage.renderHomepageContent(data)
                 }
             }
-            if (type === "releaseDate") {
-                type = dateInput.value
-                data = await APIService.fetchFilter(type, "", path, "release_date.desc")
-                HomePage.renderHomepageContent(data)
-            }
-            else if (path === "tv") {
-                if (type === "now_playing") {
-                    data = await APIService.fetchTVs("airing_today")
-                }
-                else if (type === "upcoming") {
-                    data = await APIService.fetchTVs("on_the_air")
-                }
-                else {
-                    data = await APIService.fetchTVs(type)
-                }
-                HomePage.renderHomepageContent(data)
-
-            }
-            else {
-                data = await APIService.fetchMovies(type)
-                HomePage.renderHomepageContent(data)
-            }
-
         })
 
         dateInput.addEventListener("click", (e) => {
@@ -255,7 +221,7 @@ class HomePage {
 
                     const result = await APIService.fetchFilter("", `${each.id}`, "movie", "popularity.desc")
 
-                    HomePage.renderHomepageContent(result)
+                    HomePage.renderHomepageContent(result.map(x => new Movie(x)))
 
                 })
             }
@@ -291,9 +257,9 @@ class HomePage {
                 each.addEventListener("click", async function () {
                     const result = await APIService.fetchFilter("", `${each.id}`, "tv", "popularity.desc")
 
+                    const processedResult = result.map(x => new Movie(x))
 
-
-                    HomePage.renderHomepageContent(result)
+                    HomePage.renderHomepageContent(processedResult)
                 })
             }
         })
@@ -301,7 +267,6 @@ class HomePage {
         actorActresses.addEventListener("click", (e) => {
             e.preventDefault()
             APIService.fetchPopularActors().then(actors => {
-
                 HomePage.renderHomepageContent(actors)
             })
         })
@@ -327,26 +292,20 @@ class HomePage {
             elDiv.appendChild(elVote);
             this.container.appendChild(elDiv);
 
+            // add filters to this
+            //- A filter dropdown to filter the displayed movies in the home page, based on (popular, relase date, top rated, now playing and up coming)
 
 
-            let path = ""
-            if (el.constructor.name === "TV") {
-                path = "tv"
-            }
-            else if (el.constructor.name === "Movie") {
-                path = "movie"
-            }
-            else {
-                path = "person"
-            }
+            const path = el.name ? "tv" : "movie"
 
-            if (path === "movie" || path === "tv") { //if movie/tv
+
+            if (el.constructor.name === "Movie") { //if movie/tv
                 elTitle.innerHTML = `<a href="#">${el.title || el.name || el.original_name}</a>`;
 
                 elImage.src = el.backdropUrl
 
-                const fetchType = path === "tv" ? APIService.fetchTV : APIService.fetchMovie
-                fetchType(el.id).then(x => {
+
+                APIService.fetchMovie(path, el.id).then(x => {
                     if (x.genres) {
                         for (const each of x.genres) {
                             elGenres.innerText += " " + each.name
@@ -357,7 +316,7 @@ class HomePage {
 
                 elTitle.addEventListener("click", function () {
 
-                    MovieSection.renderMovie(el)
+                    Movies.run(path, el)
                 });
 
 
@@ -367,8 +326,9 @@ class HomePage {
                 elImage.src = el.backdropUrl
                 elTitle.innerHTML = `<a href="#">${el.name}</a>`
                 elTitle.addEventListener("click", function () {
-
-                    PersonSection.renderPerson(el)
+                    APIService.fetchActor(el.id).then(x => {
+                        PersonPage.renderPersonSection(x,)
+                    })
                 });
             }
         })
@@ -377,10 +337,10 @@ class HomePage {
 
 }
 
-
+//fetchmovie path veya movies.run path
 class Movies {
-    static async run(movie) {
-        const movieData = await APIService.fetchMovie(movie.id)
+    static async run(path, movie) {
+        const movieData = await APIService.fetchMovie(path, movie.id)
         MoviePage.renderMovieSection(movieData);
 
     }
@@ -433,10 +393,10 @@ class PersonSection {
             personMovieUL.innerHTML += `<li class="personMovies" id="${x.id}" path=${x.media_type}><a href="#">${x.title || x.name}</a></li>`
 
         })
+
         for (const each of personMoviesClass) {
-            const fetchType = each.path === "tv" ? APIService.fetchTV : APIService.fetchMovie
             each.addEventListener("click", async (e) => {
-                const result = await fetchType(each.id)
+                const result = await APIService.fetchMovie(each.path, each.id)
                 MoviePage.renderMovieSection(result)
 
             })
@@ -446,7 +406,7 @@ class PersonSection {
 
 
 class MovieSection {
-    static async renderMovie(movie) {
+    static renderMovie(movie) {
 
         MoviePage.container.innerHTML = `
                 <div class= "row">
@@ -486,7 +446,6 @@ class MovieSection {
         const genres = document.getElementById("genres")
         const trailers = document.getElementById("trailers")
         const productionCompany = document.getElementById("production-company")
-
         for (const eachGenre of movie.genres) {
             genres.innerHTML += `<li> ${eachGenre.name}</li>`
         }
@@ -505,27 +464,15 @@ class MovieSection {
                 productionCompany.innerHTML += `<li><h5>${eachComp.name}</h5></li > `
             }
         }
-        const fetchCredits = movie.constructor.name === "TV" ? APIService.fetchTvCredits : APIService.fetchMovieCredits
-        fetchCredits(movie).then(resp => {
-            if (resp.cast.length > 0) {
-                for (let i = 0; i < 5; i++) {
-                    if (resp.cast[i] === undefined) {
-                        break
-                    }
-                    else {
-                        fiveActors.innerHTML += `<li class="person" id ="${resp.cast[i].id}" > <a href="#">${resp.cast[i].name} as ${resp.cast[i].character}</a></li>`
-                    }
-                }
+
+        let path = movie.release_date === "undefined" ? "tv" : "movie"
+        APIService.fetchCredits(path, movie).then(resp => {
+
+            for (let i = 0; i < 5; i++) {
+                fiveActors.innerHTML += `<li class="person" id ="${resp.cast[i].id}" > <a href="#">${resp.cast[i].name} as ${resp.cast[i].character}</a></li>`
             }
-            if (resp.crew.length > 0) {
-                const director = resp.crew.find(x => x.job == "Director" || x.job == "Executive Producer")
-                directorName.innerHTML = `<p class="person" id =${director.id}><a href="#">${director.name}</a></p>`
-            }
-
-
-
-
-
+            const director = resp.crew.find(x => x.job == "Director" || x.job == "Executive Producer")
+            directorName.innerHTML = `<p class="person" id =${director.id}><a href="#">${director.name}</a></p>`
 
             const people = document.getElementsByClassName("person")
             for (const each of people) {
@@ -537,23 +484,25 @@ class MovieSection {
                 })
             }
         })
-        const similarClass = document.getElementsByClassName("similar")
-        const getSimilar = movie.constructor.name === "TV" ? APIService.getSimilarTv : APIService.getSimilarMovies
-        const fetchType = movie.constructor.name === "TV" ? APIService.fetchTV : APIService.fetchMovie
-        const similar = await getSimilar(movie)
-        similar.map(each => {
-            similarList.innerHTML += `<li class="similar" id="${each.id}" path="${each.constructor.name}"><a href="#">${each.title || each.name}</a></li>`
+
+        APIService.getSimilar(path, movie).then(similarMovies => {
+            // creates li and sets their classes, ids and returns HTMLCollection
+            for (const each of similarMovies) {
+                similarList.innerHTML += `<li class="similar" id ="${each.id}"> <a href="#">${each.title || each.name}</a></li >`
+            }
+            return document.getElementsByClassName("similar")
+        }).then((x) => {
+            //x is htmlcollection
+            for (const each of x) {
+                each.addEventListener("click", async function () {
+                    const id = parseInt(each.id) // for each element turns id into int
+                    const data = await APIService.fetchMovie(path, id) // calls data with id
+                    MovieSection.renderMovie(data) // puts it on screen
+                })
+            }
         })
 
-        for (const each of similarClass) {
-            each.addEventListener("click", async e => {
-                const data = await fetchType(each.id)
-                MovieSection.renderMovie(data)
-            })
-        }
-        const fetchReviews = movie.constructor.name === "TV" ? APIService.fetchTvReviews : APIService.fetchMovieReviews
-
-        fetchReviews(movie).then(resp => {
+        APIService.fetchReviews(path, movie).then(resp => {
             for (const eachReview of resp.results) {
                 reviews.innerHTML += `<li >
             <h6>${eachReview.author}</h6>
@@ -572,7 +521,7 @@ class Movie {
         this.id = json.id;
         this.title = json.title;
         this.releaseDate = json.release_date
-        this.homePage = json.homepage
+        this.firstAirDate = json.first_air_date
         this.runtime = json.runtime;
         this.overview = json.overview;
         this.backdropPath = json.backdrop_path
@@ -585,56 +534,9 @@ class Movie {
         this.voteCount = json.vote_count;
         this.name = json.name
         this.media_type = json.media_type
-        this.budget = json.budget
-        this.popularity = json.popularity
-        this.createdBy = json.created_by
-        this.revenue = json.revenue
-        this.status = json.status
-        this.tagline = json.tagline
-    }
-
-    get backdropUrl() {
-        if (this.backdropPath) {
-            return Movie.BACKDROP_BASE_URL + this.backdropPath
-        }
-        else if (this.poster_path) {
-            return Movie.BACKDROP_BASE_URL + this.poster_path
-        }
-        else {
-            return "output-onlinepngtools.png"
-        }
-    }
-}
-
-class TV {
-    constructor(json) {
-        this.id = json.id;
-        this.firstAirDate = json.first_air_date
-        this.episodeRunTime = json.episode_run_time;
-        this.overview = json.overview;
-        this.backdropPath = json.backdrop_path
-        this.poster_path = json.poster_path
-        this.genres = json.genres;
-        this.videos = json.videos;
-        this.homePage = json.homepage
-        this.inProduction = json.in_production
-        this.languages = json.languages
-        this.lastAirDate = json.last_air_date
-        this.lastEpisodeToAir = json.last_episode_to_air
-        this.numEpisodes = json.number_of_episodes
-        this.numSeasons = json.number_of_seasons
-        this.popularity = json.popularity
-        this.seasons = json.seasons
-        this.productionCompany = json.production_companies;
-        this.language = json.original_language;
-        this.voteAvg = json.vote_average;
-        this.voteCount = json.vote_count;
-        this.name = json.name
-        this.media_type = json.media_type
         this.episodeRunTime = json.episode_run_time
         this.networks = json.networks
         this.createdBy = json.created_by
-        this.status = json.status
     }
 
     get backdropUrl() {
@@ -681,6 +583,9 @@ document.addEventListener("DOMContentLoaded", App.run);
 // oyuncu detaylar
 // director producer details director ve producer birden fazla olabilir.
 // footer
+
+//tv similar ve reviews
+
 // style
 
 

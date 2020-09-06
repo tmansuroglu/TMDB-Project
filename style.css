@@ -9,3 +9,7 @@
 #actors {
     margin: 24px 16px 0 0;
 }
+
+#example-date-input{
+    margin-left:-1em;
+}

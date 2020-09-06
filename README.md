@@ -32,7 +32,7 @@ buttons that go to the following pages:
 - Search box where you can type the movie or actor name and display the
 related results.
 - A filter dropdown to filter the displayed movies in the home page, based
-on (popular, relase date, top rated, now playing and up coming) 
+on (popular, relase date, top rated, now playing and up coming)
 
 ### Footer
 Add a universal footer that includes:
