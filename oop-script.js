@@ -260,14 +260,15 @@ class HomePage {
 
             //Beginning of TV Movie content
             if (type === "movie" || type === "tv") {
-                elTitle.innerHTML = `<a href="#">${el.title || el.name || el.original_name}(${el.releaseDate.split("-")[0]})</a>`;
+                elTitle.innerHTML = `<a href="#">${el.title || el.name || el.original_name}(${el.releaseDate ? el.releaseDate.split("-")[0] : el.firstAirDate.split("-")[0]
+                    })</a> `;
                 elImage.src = el.backdropUrl
                 elVote.textContent = el.vote ? `Rating: ${el.vote} (${el.voteCount} votes)` : ""
 
                 if (el.genres) {
                     elGenres.innerText += "Genres: "
                     for (const each of el.genres) {
-                        elGenres.innerText += ` ${each.name}`
+                        elGenres.innerText += ` ${each.name} `
                     }
                 }
 
@@ -281,7 +282,7 @@ class HomePage {
             //Beginning of Person content
             else {
                 elImage.src = el.backdropUrl
-                elTitle.innerHTML = `<a href="#">${el.name}</a>`
+                elTitle.innerHTML = `<a href = "#"> ${el.name}</a> `
                 elTitle.addEventListener("click", function () {
                     PersonSection.renderPerson(el)
                 });
@@ -323,29 +324,29 @@ class PersonSection {
 
 
         PersonPage.container.innerHTML = `
-            <div class= "row">
-            <div class="col-md-4">
-                <img id="movie-backdrop" src=${person.backdropUrl}> 
+    <div class= "row">
+        <div class="col-md-4">
+            <img id="movie-backdrop" src=${person.backdropUrl}> 
         </div>
-                <div class="col-md-8">
-                    <h2 id="person-name">${person.name}</h2>
-                    <p id="person-popularity">Popularity score: ${person.popularity ? person.popularity : "Unknown"}</p>
-                    <p id="person-known-for">${person.known_for_department ? "Known for: " + person.known_for_department : ""}</p>
-                    <p id="person-famous-roles">${person.also_known_as ? "Also known as: " + person.also_known_as : ""}</p>
-                    <h3>Biography</h3>
-                    <p id="person-biography">${person.biography ? person.biography : "Unknown"}</p>
-                    <p id="person-gender">Gender:${person.gender == 2 ? "Male" : "Female"}</p>
-                    <p id="person-birthday">${person.birthday ? "Birthdate: " + person.birthday : "Unknown"}</p>
-                    <p id="person-deathday">${person.deathday ? "Date of Death: " + person.deathday : ""}</p>
-                    
-                    
-                    <p id="person-birthplace">Birthplace: ${person.place_of_birth ? person.place_of_birth : "Unknown"}</p>
-                    
-                    <h3>${person.name}'s Other Works:</h3>
-                    <ul id="person-movie-list"></ul>
-                </div>
+            <div class="col-md-8">
+                <h2 id="person-name">${person.name}</h2>
+                <p id="person-popularity">Popularity score: ${person.popularity ? person.popularity : "Unknown"}</p>
+                <p id="person-known-for">${person.known_for_department ? "Known for: " + person.known_for_department : ""}</p>
+                <p id="person-famous-roles">${person.also_known_as ? "Also known as: " + person.also_known_as : ""}</p>
+                <h3>Biography</h3>
+                <p id="person-biography">${person.biography ? person.biography : "Unknown"}</p>
+                <p id="person-gender">Gender:${person.gender == 2 ? "Male" : "Female"}</p>
+                <p id="person-birthday">${person.birthday ? "Birthdate: " + person.birthday : "Unknown"}</p>
+                <p id="person-deathday">${person.deathday ? "Date of Death: " + person.deathday : ""}</p>
+
+
+                <p id="person-birthplace">Birthplace: ${person.place_of_birth ? person.place_of_birth : "Unknown"}</p>
+
+                <h3>${person.name}'s Other Works:</h3>
+                <ul id="person-movie-list"></ul>
             </div>
-    `;
+        </div>
+`;
 
         const personOtherWorkUl = document.getElementById("person-movie-list")
         const personOtherWork = document.getElementsByClassName("personOtherWork")
@@ -353,13 +354,13 @@ class PersonSection {
         if (person.cast.length > 0 || person.crew.length > 0) {
             if (person.cast.length > 0)
                 person.cast.forEach(eachCredit => {
-                    personOtherWorkUl.innerHTML += `<li class="personOtherWork" id="${eachCredit.id} ${eachCredit.media_type}"><a href="#">${eachCredit.title || eachCredit.name}</a></li>`
+                    personOtherWorkUl.innerHTML += `<li class="personOtherWork" id = "${eachCredit.id} ${eachCredit.media_type}"> <a href="#">${eachCredit.title || eachCredit.name}</a></li > `
 
                 })
 
             if (person.crew.length > 0) {
                 person.crew.forEach(eachCredit => {
-                    personOtherWorkUl.innerHTML += `<li class="personOtherWork" id="${eachCredit.id} ${eachCredit.media_type}"><a href="#">${eachCredit.title || eachCredit.name}</a></li>`
+                    personOtherWorkUl.innerHTML += `<li class="personOtherWork" id = "${eachCredit.id} ${eachCredit.media_type}"> <a href="#">${eachCredit.title || eachCredit.name}</a></li > `
                 })
             }
 
@@ -384,41 +385,41 @@ class PersonSection {
 class MovieSection {
     static async renderMovie(movie) {
         MoviePage.container.innerHTML = `
-                <div class= "row">
-                <div class="col-md-4">
-                    <img id="movie-backdrop" src=${movie.backdropUrl}> 
+    <div class= "row">
+        <div class="col-md-4">
+            <img id="movie-backdrop" src=${movie.backdropUrl}> 
         </div>
-                    <div class="col-md-8">
-                        <h2 id="movie-title">${movie.title || movie.name}</h2>
-                        <h5>${movie.tagline}</h5>
-                        <h4>Genres:</h4>
-                        <ul id="genres"></ul>
-                        <p id="movie-release-date">Release Date: ${movie.releaseDate ? movie.releaseDate : "Unknown"}</p>
-                        <p id="movie-runtime">Runtime: ${movie.runtime ? movie.runtime + " minutes" : "Unknown"}</p>
-                        <p id="movie-lang">Original Language: ${movie.language ? movie.language : "Unknown"}</p>
-                        <p id="movie-vote">Avg Vote: ${movie.vote ? movie.vote : "Unknown"} (${movie.voteCount ? movie.voteCount : "Unknown"}) </p>
-                        <p>Popularity Score: ${movie.popularity ? movie.popularity : "Unknown"}</p>
-                        <p>Budget: ${movie.budget !== 0 ? movie.budget + "$" : "Unknown"} </p>
-                        <p>Revenue: ${movie.revenue !== 0 ? movie.revenue + "$" : "Unknown"}</p>
-                        <h4>Director</h4>
-                        <div id="movie-director"></div>
-                        <h3>Overview:</h3>
-                        <p id="movie-overview">${movie.overview ? movie.overview : "Unknown"}</p>
-                        <h4>Cast:</h4>
-                        <ul id="cast"></ul>
-                        <h4>Production Companies</h4>
-                        <ul id="production-company"></ul>
-                        <h4>Trailers</h4>
-                        <ul id="trailers"></ul>
-                        <h4>Similar:</h4>
-                        <ul id="similar-movies"></ul>
-                        <h4>Reviews</h4>
-                        <ul id="reviews"></ul>
+            <div class="col-md-8">
+                <h2 id="movie-title">${movie.title || movie.name}</h2>
+                <h5>${movie.tagline}</h5>
+                <h4>Genres:</h4>
+                <ul id="genres"></ul>
+                <p id="movie-release-date">Release Date: ${movie.releaseDate ? movie.releaseDate : "Unknown"}</p>
+                <p id="movie-runtime">Runtime: ${movie.runtime ? movie.runtime + " minutes" : "Unknown"}</p>
+                <p id="movie-lang">Original Language: ${movie.language ? movie.language : "Unknown"}</p>
+                <p id="movie-vote">Avg Vote: ${movie.vote ? movie.vote : "Unknown"} (${movie.voteCount ? movie.voteCount : "Unknown"}) </p>
+                <p>Popularity Score: ${movie.popularity ? movie.popularity : "Unknown"}</p>
+                <p>Budget: ${movie.budget !== 0 ? movie.budget + "$" : "Unknown"} </p>
+                <p>Revenue: ${movie.revenue !== 0 ? movie.revenue + "$" : "Unknown"}</p>
+                <h4>Director</h4>
+                <div id="movie-director"></div>
+                <h3>Overview:</h3>
+                <p id="movie-overview">${movie.overview ? movie.overview : "Unknown"}</p>
+                <h4>Cast:</h4>
+                <ul id="cast"></ul>
+                <h4>Production Companies</h4>
+                <ul id="production-company"></ul>
+                <h4>Trailers</h4>
+                <ul id="trailers"></ul>
+                <h4>Similar:</h4>
+                <ul id="similar-movies"></ul>
+                <h4>Reviews</h4>
+                <ul id="reviews"></ul>
 
 
-                    </div>
-                </div>
-    `;
+            </div>
+        </div>
+`;
         const reviews = document.getElementById("reviews")
         const similarList = document.getElementById("similar-movies")
         const directorName = document.getElementById("movie-director")
@@ -433,7 +434,7 @@ class MovieSection {
         //Beginning of genre list
         if (movie.genres.length > 0) {
             for (const eachGenre of movie.genres) {
-                genres.innerHTML += `<li> ${eachGenre.name}</li>`
+                genres.innerHTML += `<li> ${eachGenre.name}</li > `
             }
         }
         else {
@@ -444,11 +445,12 @@ class MovieSection {
         //Beginning of Video list
         if (movie.videos.length > 0) {
             for (const eachTrailer of movie.videos) {
-                trailers.innerHTML += `<li>
-                <div class="embed-responsive embed-responsive-16by9">
-                    <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/${eachTrailer.key}" allowfullscreen></iframe>
-                </div>
-                </li>`
+                if (eachTrailer.type === "Trailer")
+                    trailers.innerHTML += `<li>
+    <div class="embed-responsive embed-responsive-16by9">
+        <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/${eachTrailer.key}" allowfullscreen></iframe>
+    </div>
+                </li > `
             }
         }
         else {
@@ -460,10 +462,10 @@ class MovieSection {
         if (movie.productionCompanies.length > 0) {
             for (const eachComp of movie.productionCompanies) {
                 if (eachComp.logo_path) {
-                    productionCompany.innerHTML += `<li><h5>${eachComp.name}</h5><img src="http://image.tmdb.org/t/p/original${eachComp.logo_path}" width=100px ></li >`
+                    productionCompany.innerHTML += `<li> <h5>${eachComp.name}</h5><img src="http://image.tmdb.org/t/p/original${eachComp.logo_path}" width=100px ></li > `
 
                 } else {
-                    productionCompany.innerHTML += `<li><h5>${eachComp.name}</h5></li > `
+                    productionCompany.innerHTML += `<li> <h5>${eachComp.name}</h5></li > `
                 }
             }
         }
@@ -475,7 +477,7 @@ class MovieSection {
         //Beginning of Director
         if (movie.crew.length > 0) {
             const director = movie.crew.find(x => x.job == "Director" || x.job == "Executive Producer")
-            directorName.innerHTML = `<p class="person" id =${director.id}><a href="#">${director.name}</a></p>`
+            directorName.innerHTML = `<p class="person" id = ${director.id}> <a href="#">${director.name}</a></p > `
         }
         else {
             directorName.innerHTML = "<p>Unknown</p>"
@@ -485,7 +487,7 @@ class MovieSection {
         // Beginning of Movie Cast
         if (movie.cast.length > 0) {
             movie.cast.forEach(each => {
-                cast.innerHTML += `<li class="crew" id ="${each.id}" > <a href="#">${each.name}</a> as ${each.character}</li>`
+                cast.innerHTML += `<li class="crew" id = "${each.id}" > <a href="#">${each.name}</a> as ${each.character}</li> `
             })
         }
         else {
@@ -505,7 +507,7 @@ class MovieSection {
         //Beginning of Similar list
         if (movie.similar.length > 0) {
             movie.similar.map(each => {
-                similarList.innerHTML += `<li class="similar" id="${each.id}" path="${each.constructor.name}"><a href="#">${each.title || each.name}</a></li>`
+                similarList.innerHTML += `<li class="similar" id = "${each.id}" path = "${each.constructor.name}" > <a href="#">${each.title || each.name}</a></li> `
             })
         }
         else {
@@ -526,13 +528,13 @@ class MovieSection {
         if (movie.reviews.length > 0) {
             for (const eachReview of movie.reviews) {
                 reviews.innerHTML += `<li>
-                <h6>${eachReview.author}</h6>
-                <p>${eachReview.content}</p>
-                    </li>`
+    <h6>${eachReview.author}</h6>
+    <p>${eachReview.content}</p>
+                    </li > `
             }
         }
         else {
-            reviews.innerHTML = `<p>No reviews yet!</p>`
+            reviews.innerHTML = `<p > No reviews yet!</p > `
         }
         //End of Review list
 
@@ -670,15 +672,11 @@ class Person {
 document.addEventListener("DOMContentLoaded", App.run);
 
 
-
-
-
-// some videos are not acutally trailers
-// director producer details director ve producer birden fazla olabilir.
 // footer
 // style
 
 
+// parametreler için açıklama yaz
 
 // geri butonu
 // page number
