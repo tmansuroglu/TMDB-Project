@@ -2,17 +2,16 @@
 <html>
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
         integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <link rel="stylesheet" href="style.css">
     <title>Movie</title>
 </head>
 
 <body>
+    <!--Beginning of Navbar-->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
         <a class="navbar-brand" href="index.html">TMDB</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
@@ -27,7 +26,7 @@
                 </li>
                 <!--  Movie dropdown-->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                    <a class="text-dark nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Movie Genres
                     </a>
@@ -36,7 +35,7 @@
                 </li>
                 <!-- TV dropdown-->
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                    <a class="text-dark nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         TV Genres
                     </a>
@@ -46,11 +45,11 @@
 
                 <!--Beginning of Find Movies-->
                 <li class="nav-item dropdown" id="filterNav">
-                    <a class="nav-link dropdown-toggle find" href="#" id="navbarDropdown" role="button"
+                    <a class="text-dark nav-link dropdown-toggle find" href="#" id="navbarDropdown" role="button"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Filter
                     </a>
-                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <div id="dropdownMenu" class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <form>
                             <div class="form-group">
                                 <div class="form-check ml-4 mt-2">
@@ -114,8 +113,8 @@
                                     </label>
                                 </div>
                                 <hr>
-                                <button type="submit" class="btn btn-primary ml-4 mt-2"
-                                    id="filterSearch">Search</button>
+                                <button type="submit" class="btn btn-primary ml-4 mt-2" data-toggle="collapse"
+                                    data-target="#dropdownMenu" id="filterSearch">Search</button>
                             </div>
                         </form>
                     </div>
@@ -147,9 +146,21 @@
 
         </div>
     </nav>
-    <div id="container" class="container">
+    <!--End of Navbar-->
+    <div id="container" class="container-fluid">
     </div>
-    <script src="./oop-script.js"></script>
+
+
+    <footer class="footer mt-5 py-3 align-items-bottom">
+        <div class="container text-center my-0 py-0">
+            <span class="text-white mx-auto ">Made by: <a href="https://github.com/tmansuroglu" target="_blank">Tarkan
+                    Mansuroğlu <img src="./GitHub-Mark-32px.png" class="img"></img></a> and
+                <a href="https://github.com/bertacsevercan" target="_blank">Bertaç Severcan <img
+                        src="./GitHub-Mark-32px.png" class="img"></img></a></span>
+        </div>
+    </footer>
+
+
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
         integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
         crossorigin="anonymous"></script>
@@ -159,6 +170,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
         integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV"
         crossorigin="anonymous"></script>
+    <script src="./oop-script.js"></script>
 </body>
 
 

@@ -2,7 +2,7 @@
 
 class App {
     static async run() {
-        const movies = await APIService.fetchMultiple()
+        const movies = await APIService.fetchMultiple("movie", "now_playing")
         HomePage.renderHomepageContent(movies);
         HomePage.renderNav()
 
@@ -18,18 +18,22 @@ class APIService {
     static _constructUrl(path, append = "", item = "") {
         return `${this.TMDB_BASE_URL}/${path}?api_key=${'50263a781de21add754e80576984b3e5'}${append + item}`;
     }
-
-    //fetches multiple movies for filter button
-    static async fetchMultiple(type = "movie", path = "now_playing") {
-        const url = APIService._constructUrl(`${type}/${path}`)
+    static async fetchMultiple(type = "movie", path) {
+        const url = APIService._constructUrl(`${type}${path ? "/" + path : ""}`)
         const response = await fetch(url)
         const data = await response.json()
-        const detailedData = data.results.map(async each => await this.fetchSingle(type, each.id))
-        return Promise.all(detailedData)
+        if (type === "genre/movie/list" || type === "genre/tv/list") {
+            return data.genres
+        }
+        else {
+            const detailedData = data.results.map(async each => await this.fetchSingle(type, each.id))
+            return Promise.all(detailedData)
+        }
+
     }
 
-    // fetches singular person/tv/movie
-    static async fetchSingle(type, id) {
+    // fetches single person/tv/movie
+    static async fetchSingle(type, id = "") {
         let output = ""
         const url = APIService._constructUrl(`${type}/${id}`, "&append_to_response=", "videos,reviews,credits,similar,combined_credits")
         const response = await fetch(url)
@@ -43,9 +47,8 @@ class APIService {
         else {
             output = new Person(data)
         }
-        console.log(output)
-        return output
 
+        return output
     }
 
     //search by string
@@ -83,22 +86,6 @@ class APIService {
     }
 
 
-
-    // fetches all known genres (unrelated to a movie/tv/person)
-    static async fetchGenres(path) {
-        const url = APIService._constructUrl(`genre/${path}/list`)
-        const response = await fetch(url)
-        const data = await response.json()
-        return data.genres
-    }
-
-    static async fetchPopularStars() {
-        const url = APIService._constructUrl(`person/popular`)
-        const response = await fetch(url)
-        const data = await response.json()
-        const detailedData = data.results.map(each => APIService.fetchSingle("person", each.id))
-        return Promise.all(detailedData)
-    }
 }
 // End of API Service
 
@@ -124,6 +111,8 @@ class HomePage {
 
         //Beginning of filter button 
         filterSearchButton.addEventListener("click", async (a) => {
+
+
             let path = ""
             let type = ""
             let data = ""
@@ -181,7 +170,7 @@ class HomePage {
         //Beginning genre dropdown generator
         const genreDropdown = async (type) => {
             const navBarEl = type === "tv" ? document.getElementById("tv-dropdown") : document.getElementById("movie-dropdown")
-            const genresArr = await APIService.fetchGenres(type)
+            const genresArr = await APIService.fetchMultiple(`genre/${type}/list`, "")
             for (const each of genresArr) {
                 navBarEl.innerHTML += `<a class="dropdown-item ${type}-genre" id=${each.id} href="#">${each.name}</a>`
             }
@@ -202,11 +191,14 @@ class HomePage {
 
         //Beginning of about page
         about.addEventListener("click", (e) => {
-            this.container.innerHTML = `<h3>About</h3>
-            
+            this.container.className = ""
+            this.container.innerHTML = `
+            <div id="aboutt" class="container p-5 my-5">
+            <h3>About</h3>
             <p> Lorem ipsum  Quisque id tellus euismod, interdum mi ac, mattis ligula. Ut scelerisque luctus ex, sit amet aliquet tortor faucibus sed. Suspendisse dignissim augue leo, quis varius tellus lobortis quis. Ut vehicula id tellus nec congue. Duis pharetra massa vitae congue luctus. Mauris a semper nunc, eu lobortis ante. Morbi tempor, lectus in varius porta, est erat imperdiet magna, id molestie felis erat non eros. Nullam tellus ligula, rhoncus in tempus in, finibus vitae felis. Donec aliquam fermentum aliquam. Phasellus elementum, purus nec eleifend interdum, libero neque varius tellus, in volutpat nunc sem ac elit. Aliquam ornare posuere iaculis. Quisque sit amet libero iaculis, dictum ligula at, placerat enim. Etiam egestas quam dictum, lacinia libero eu, euismod felis. Morbi feugiat vulputate odio id pretium. Nunc rutrum auctor velit.  </p>
             <p> Lorem ipsum  Quisque id tellus euismod, interdum mi ac, mattis ligula. Ut scelerisque luctus ex, sit amet aliquet tortor faucibus sed. Suspendisse dignissim augue leo, quis varius tellus lobortis quis. Ut vehicula id tellus nec congue. Duis pharetra massa vitae congue luctus. Mauris a semper nunc, eu lobortis ante. Morbi tempor, lectus in varius porta, est erat imperdiet magna, id molestie felis erat non eros. Nullam tellus ligula, rhoncus in tempus in, finibus vitae felis. Donec aliquam fermentum aliquam. Phasellus elementum, purus nec eleifend interdum, libero neque varius tellus, in volutpat nunc sem ac elit. Aliquam ornare posuere iaculis. Quisque sit amet libero iaculis, dictum ligula at, placerat enim. Etiam egestas quam dictum, lacinia libero eu, euismod felis. Morbi feugiat vulputate odio id pretium. Nunc rutrum auctor velit.  </p>
-            <p> Lorem ipsum  Quisque id tellus euismod, interdum mi ac, mattis ligula. Ut scelerisque luctus ex, sit amet aliquet tortor faucibus sed. Suspendisse dignissim augue leo, quis varius tellus lobortis quis. Ut vehicula id tellus nec congue. Duis pharetra massa vitae congue luctus. Mauris a semper nunc, eu lobortis ante. Morbi tempor, lectus in varius porta, est erat imperdiet magna, id molestie felis erat non eros. Nullam tellus ligula, rhoncus in tempus in, finibus vitae felis. Donec aliquam fermentum aliquam. Phasellus elementum, purus nec eleifend interdum, libero neque varius tellus, in volutpat nunc sem ac elit. Aliquam ornare posuere iaculis. Quisque sit amet libero iaculis, dictum ligula at, placerat enim. Etiam egestas quam dictum, lacinia libero eu, euismod felis. Morbi feugiat vulputate odio id pretium. Nunc rutrum auctor velit.  </p>`
+            <p> Lorem ipsum  Quisque id tellus euismod, interdum mi ac, mattis ligula. Ut scelerisque luctus ex, sit amet aliquet tortor faucibus sed. Suspendisse dignissim augue leo, quis varius tellus lobortis quis. Ut vehicula id tellus nec congue. Duis pharetra massa vitae congue luctus. Mauris a semper nunc, eu lobortis ante. Morbi tempor, lectus in varius porta, est erat imperdiet magna, id molestie felis erat non eros. Nullam tellus ligula, rhoncus in tempus in, finibus vitae felis. Donec aliquam fermentum aliquam. Phasellus elementum, purus nec eleifend interdum, libero neque varius tellus, in volutpat nunc sem ac elit. Aliquam ornare posuere iaculis. Quisque sit amet libero iaculis, dictum ligula at, placerat enim. Etiam egestas quam dictum, lacinia libero eu, euismod felis. Morbi feugiat vulputate odio id pretium. Nunc rutrum auctor velit.  </p>
+            </div>`
         })
         //End of about page
 
@@ -221,7 +213,7 @@ class HomePage {
         //Beginning of popularstars button evt list
         popularStars.addEventListener("click", async (e) => {
             e.preventDefault()
-            const popularStars = await APIService.fetchPopularStars()
+            const popularStars = await APIService.fetchMultiple("person", "popular")
             HomePage.renderHomepageContent(popularStars)
         })
         //End of popularstars button evt list
@@ -231,18 +223,23 @@ class HomePage {
     // Beginning of home page content renderer
     static renderHomepageContent(arr) {
         this.container.innerHTML = ""
+        this.container.className = ""
+        this.container.className += " row mx-auto justify-content-center my-5"
         arr.forEach(async el => {
-
-            const elDiv = document.createElement("div");
             const elImage = document.createElement("img");
             const elTitle = document.createElement("h3");
-            const elGenres = document.createElement("p");
-            const elVote = document.createElement("p");
+            const elDiv = document.createElement("div");
+            const elVideo = document.createElement("div")
+
+            elDiv.className += " card col-10 col-sm-4 col-md-4 col-xl-3  px-2 pt-4 m-5"
+            elDiv.style.width = "20rem"
+            elTitle.className += " text-center"
+            elImage.className += " img-fluid p-2 mb-2 rounded"
+            elVideo.className += " text-center"
 
             elDiv.appendChild(elTitle);
-            elDiv.appendChild(elImage);
-            elDiv.appendChild(elGenres);
-            elDiv.appendChild(elVote);
+            elDiv.appendChild(elImage)
+            elDiv.appendChild(elVideo)
             this.container.appendChild(elDiv);
 
             //Beginning of content deciding
@@ -259,34 +256,102 @@ class HomePage {
             //End of content deciding
 
             //Beginning of TV Movie content
-            if (type === "movie" || type === "tv") {
-                elTitle.innerHTML = `<a href="#">${el.title || el.name || el.original_name}(${el.releaseDate ? el.releaseDate.split("-")[0] : el.firstAirDate.split("-")[0]
-                    })</a> `;
-                elImage.src = el.backdropUrl
-                elVote.textContent = el.vote ? `Rating: ${el.vote} (${el.voteCount} votes)` : ""
 
-                if (el.genres) {
-                    elGenres.innerText += "Genres: "
-                    for (const each of el.genres) {
-                        elGenres.innerText += ` ${each.name} `
-                    }
+            elTitle.innerHTML = `<a href="#">${el.title || el.name || el.original_name} ${el.releaseDate ? "(" + el.releaseDate.split("-")[0] + ")" || "(" + el.firstAirDate.split("-")[0] + ")" : ""
+                }</a> `;
+            elImage.src = el.backdropUrl
+            el.tagline ? elDiv.innerHTML += `<p class="text-center p-0 m-0">${el.tagline}</p>` : ""
+
+
+            //change mouse curson on hover
+            elDiv.addEventListener("mouseover", (e) => {
+                e.target.style.cursor = "pointer";
+            })
+
+
+            // Beginning of rating
+            if (el.constructor.name === "TV" || el.constructor.name === "Movie") {
+                elDiv.innerHTML += "<h5 class='text-center mt-2'>Rating</h5>"
+                elDiv.innerHTML += `<div class="progress mx-auto mb-4">
+            <div class="progress-bar" id=${el.id} role="progressbar" style="width: ${el.vote * 10}%" aria-valuenow="${el.vote ? el.vote : "?"}" aria-valuemin="0" aria-valuemax="10">${el.vote ? el.vote : "?"} / 10</div>
+          </div>`
+                const progress = document.getElementById(el.id)
+                if (el.vote < 5) {
+                    progress.style.background = "light blue"
                 }
 
-                elTitle.addEventListener("click", function () {
-                    MovieSection.renderMovie(el)
-                });
+                else if (el.vote >= 5 && el.vote < 6) {
+                    progress.style.background = "rgb(255, 32, 33)" //red
+                }
+                else if (el.vote >= 6 && el.vote < 7) {
+                    progress.style.background = "rgb(255, 192, 0)" //orange
+                }
+                else if (el.vote >= 7 && el.vote < 8) {
+                    progress.style.background = "rgb(254, 252, 3)" //yellow
+                }
+                else if (el.vote >= 8 && el.vote < 9) {
+                    progress.style.background = "rgb(177, 222, 129)" // light green
 
+                }
+                else {
+                    progress.style.background = "rgb(0, 254, 114)" //bright green
+                }
             }
-            //End of TV Movie content
+            // End of rating
 
-            //Beginning of Person content
-            else {
-                elImage.src = el.backdropUrl
-                elTitle.innerHTML = `<a href = "#"> ${el.name}</a> `
-                elTitle.addEventListener("click", function () {
+
+
+
+
+            //Beginning of  Popover
+            18
+            const genreStr = el.genres ? "Genres: " + el.genres.map(x => x.name).join(", ") : "Known for: " + el.known_for_department
+            const data = `${el.overview ? `Overview: ${el.overview}\n\n` : ""}${el.also_known_as ? "Also Known As: " + el.also_known_as + "\n\n" : ""}${el.popularity ? "Popularity Score: " + el.popularity : ""}`
+            elDiv.setAttribute("data-placement", "right")
+            elDiv.setAttribute("data-toggle", "popover")
+            elDiv.setAttribute("data-trigger", "hover")
+            elDiv.setAttribute("title", genreStr)
+            elDiv.setAttribute("data-content", data)
+
+
+
+            $(function () {
+                $('[data-toggle="popover"]').popover({
+                    trigger: 'hover',
+                    html: true,
+                    sanitize: true,
+
+                })
+            })
+            //Removes popover on click
+            this.container.addEventListener("click", (e) => {
+                const pops = document.getElementsByClassName("popover")
+                for (const each of pops) {
+
+                    const previousPop = document.getElementById(each.id)
+                    previousPop.style.display = "none"
+                }
+            })
+
+
+            //End of Popover
+
+            elTitle.addEventListener("click", e => {
+                elDiv.click()
+            })
+
+            elImage.addEventListener("click", (e) => {
+                elDiv.click()
+            })
+            //adds evt list to cards
+            elDiv.addEventListener("click", function () {
+                if (type === "person") {
+
                     PersonSection.renderPerson(el)
-                });
-            }
+                } else {
+                    MovieSection.renderMovie(el)
+                }
+            });
         })
         //End of Person content
 
@@ -296,9 +361,9 @@ class HomePage {
 // End of homepage
 
 class Movies {
-    static async run(movie) {
-        const movieData = await APIService.fetchSingle("movie", movie.id)
-        MoviePage.renderMovieSection(movieData);
+    static async run(media) {
+        const mediaData = await APIService.fetchSingle("movie", media.id)
+        MoviePage.renderMovieSection(mediaData);
 
     }
 }
@@ -311,8 +376,8 @@ class PersonPage {
 }
 class MoviePage {
     static container = document.getElementById('container');
-    static renderMovieSection(movie) {
-        MovieSection.renderMovie(movie);
+    static renderMovieSection(media) {
+        MovieSection.renderMovie(media);
     }
 }
 
@@ -321,46 +386,84 @@ class MoviePage {
 //Beginning of single person page
 class PersonSection {
     static async renderPerson(person) {
-
-
         PersonPage.container.innerHTML = `
     <div class= "row">
         <div class="col-md-4">
-            <img id="movie-backdrop" src=${person.backdropUrl}> 
+        
+        
+            <img class="img-fluid" id="media-backdrop" src=${person.backdropUrl}> 
+            <ul class="mt-4" id="person-gender">Gender: ${person.gender == 2 ? "Male" : "Female"}</ul>
+                <ul id="person-birthday">${person.birthday ? "Birthdate: " + person.birthday : "Unknown"}</ul>
+                <ul id="person-deathday">${person.deathday ? "Date of Death: " + person.deathday : ""}</ul>
+                <ul id="person-birthplace">Birthplace: ${person.place_of_birth ? person.place_of_birth : "Unknown"}</ul>
+            <ul  id="person-known-for">${person.known_for_department ? "Known for: " + person.known_for_department : ""}</ul>
+        <ul  id="person-famous-roles">${person.also_known_as ? "Also known as: " + person.also_known_as : ""}</ul>
+            <ul  id="person-popularity">Popularity score: ${person.popularity ? person.popularity : "Unknown"}</ul>
         </div>
             <div class="col-md-8">
-                <h2 id="person-name">${person.name}</h2>
-                <p id="person-popularity">Popularity score: ${person.popularity ? person.popularity : "Unknown"}</p>
-                <p id="person-known-for">${person.known_for_department ? "Known for: " + person.known_for_department : ""}</p>
-                <p id="person-famous-roles">${person.also_known_as ? "Also known as: " + person.also_known_as : ""}</p>
+            <h2  id="person-name">${person.name}</h2>
                 <h3>Biography</h3>
-                <p id="person-biography">${person.biography ? person.biography : "Unknown"}</p>
-                <p id="person-gender">Gender:${person.gender == 2 ? "Male" : "Female"}</p>
-                <p id="person-birthday">${person.birthday ? "Birthdate: " + person.birthday : "Unknown"}</p>
-                <p id="person-deathday">${person.deathday ? "Date of Death: " + person.deathday : ""}</p>
-
-
-                <p id="person-birthplace">Birthplace: ${person.place_of_birth ? person.place_of_birth : "Unknown"}</p>
-
+                <ul id="person-biography">${person.biography ? person.biography : "Unknown"}</ul>
+                
                 <h3>${person.name}'s Other Works:</h3>
                 <ul id="person-movie-list"></ul>
+
+                
+
+
+
+
             </div>
         </div>
 `;
+        PersonPage.container.className = ""
+        PersonPage.container.className += " container personPage my-5 p-5"
 
         const personOtherWorkUl = document.getElementById("person-movie-list")
         const personOtherWork = document.getElementsByClassName("personOtherWork")
         //Beginning of person's other works
+        const workArr = []
         if (person.cast.length > 0 || person.crew.length > 0) {
             if (person.cast.length > 0)
                 person.cast.forEach(eachCredit => {
-                    personOtherWorkUl.innerHTML += `<li class="personOtherWork" id = "${eachCredit.id} ${eachCredit.media_type}"> <a href="#">${eachCredit.title || eachCredit.name}</a></li > `
+                    workArr.push(eachCredit)
+                    //personOtherWorkUl.innerHTML += `<li class="personOtherWork" id = "${eachCredit.id} ${eachCredit.media_type}"> <a href="#">${eachCredit.title || eachCredit.name}</a></li > `
 
                 })
 
             if (person.crew.length > 0) {
                 person.crew.forEach(eachCredit => {
-                    personOtherWorkUl.innerHTML += `<li class="personOtherWork" id = "${eachCredit.id} ${eachCredit.media_type}"> <a href="#">${eachCredit.title || eachCredit.name}</a></li > `
+                    workArr.push(eachCredit)
+                    //personOtherWorkUl.innerHTML += `<li class="personOtherWork" id = "${eachCredit.id} ${eachCredit.media_type}"> <a href="#">${eachCredit.title || eachCredit.name}</a></li > `
+                })
+            }
+            //
+
+            if (workArr.length > 25) {
+                personOtherWorkUl.innerHTML = `
+                <div class="accordion" id="accordionExample">
+  <div class="card">
+    <div class="card-header" id="headingOne">
+      <h2 class="mb-0">
+        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+          Click here to see all
+        </button>
+      </h2>
+    </div>
+
+    <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionExample">
+      <ul class="card-body" id="collapsible list">
+      </ul>
+    </div>
+  </div>
+                `
+                const collapsible = document.getElementById("collapsible list")
+                workArr.forEach(eachCredit => {
+                    collapsible.innerHTML += `<li class="personOtherWork" id = "${eachCredit.id} ${eachCredit.media_type}"> <a href="#">${eachCredit.title || eachCredit.name}</a></li>`
+                })
+            } else {
+                workArr.forEach(eachCredit => {
+                    personOtherWorkUl.innerHTML += `<li class="personOtherWork" id = "${eachCredit.id} ${eachCredit.media_type}"> <a href="#">${eachCredit.title || eachCredit.name}</a></li>`
                 })
             }
 
@@ -383,86 +486,112 @@ class PersonSection {
 
 // Beginning of single movie page
 class MovieSection {
-    static async renderMovie(movie) {
+    static async renderMovie(media) {
+
         MoviePage.container.innerHTML = `
     <div class= "row">
         <div class="col-md-4">
-            <img id="movie-backdrop" src=${movie.backdropUrl}> 
-        </div>
-            <div class="col-md-8">
-                <h2 id="movie-title">${movie.title || movie.name}</h2>
-                <h5>${movie.tagline}</h5>
-                <h4>Genres:</h4>
-                <ul id="genres"></ul>
-                <p id="movie-release-date">Release Date: ${movie.releaseDate ? movie.releaseDate : "Unknown"}</p>
-                <p id="movie-runtime">Runtime: ${movie.runtime ? movie.runtime + " minutes" : "Unknown"}</p>
-                <p id="movie-lang">Original Language: ${movie.language ? movie.language : "Unknown"}</p>
-                <p id="movie-vote">Avg Vote: ${movie.vote ? movie.vote : "Unknown"} (${movie.voteCount ? movie.voteCount : "Unknown"}) </p>
-                <p>Popularity Score: ${movie.popularity ? movie.popularity : "Unknown"}</p>
-                <p>Budget: ${movie.budget !== 0 ? movie.budget + "$" : "Unknown"} </p>
-                <p>Revenue: ${movie.revenue !== 0 ? movie.revenue + "$" : "Unknown"}</p>
-                <h4>Director</h4>
-                <div id="movie-director"></div>
-                <h3>Overview:</h3>
-                <p id="movie-overview">${movie.overview ? movie.overview : "Unknown"}</p>
+            <img class="img-fluid" id="media-backdrop" src=${media.backdropUrl}>
+            
+            <h5 class="mt-4">${media.tagline ? media.tagline : ""}</h5>
+            <h5 id="homePage-header"></h5>
+                <ul id="tvWebLink"></ul>
+                <ul id="genres">Genres: </ul>
+                
+                <ul id="media-release-date">${media.releaseDate ? "<li>Release Date: " + media.releaseDate + "</li>" : ""}</ul>
+                <ul>${media.firstAirDate ? "<li> First Air Date: " + media.firstAirDate + "</li>" : ""}</ul>
+                <ul id="media-runtime">${media.runtime ? "<li>Runtime: " + media.runtime + " minutes</li>" : ""}</ul>
+                <ul id="media-runtime">${media.episodeRunTime ? "<li>Runtime: " + media.episodeRunTime + " minutes per episode</li>" : ""}</ul>
+                <ul id="media-lang">${media.language ? "<li> Original Language " + media.language.toUpperCase() + "</li>" : ""}</ul>
+                <ul id="media-vote"><li>Avg Vote: ${media.vote ? media.vote : "Unknown"} (${media.voteCount ? media.voteCount : "Unknown"})</li> </ul>
+                <ul><li>Popularity Score: ${media.popularity ? media.popularity : "Unknown"}</li></ul>
+                <ul>${media.budget ? "<li>Budget: " + media.budget + "$</li>" : ""} </ul>
+                <ul>${media.revenue ? "<li>Revenue: " + media.revenue + "$</li>" : ""}</ul>
                 <h4>Cast:</h4>
                 <ul id="cast"></ul>
+                <h4 id="createdBy-header"></h4>
+                <ul id="createdBy"></ul>
+                <h4 id="director-header">Director(s)</h4>
+                <ul id="media-director"></ul>
+                <h4 id="exec-header">Executive Producer(s)</h4>
+                <ul id="media-execProducers"></ul>
+                <h4 id="networks-header"></h4>
+                <ul id="networks"></ul>
                 <h4>Production Companies</h4>
                 <ul id="production-company"></ul>
+                <h4>Similar:</h4>
+                <ul id="similar-medias"></ul>
+        </div>
+            <div class="col-md-8">
+                <h1 id="media-title">${media.title || media.name}</h2>
+                <h3 class="mt-3">Overview:</h3>
+                <ul id="media-overview"><li>${media.overview ? media.overview : "Unknown"}</li></ul>
                 <h4>Trailers</h4>
                 <ul id="trailers"></ul>
-                <h4>Similar:</h4>
-                <ul id="similar-movies"></ul>
+                
+                
+                
+                <h4 id="seasons-header"></h4>
+                <ul id="seasons"></ul>
                 <h4>Reviews</h4>
                 <ul id="reviews"></ul>
-
-
             </div>
         </div>
 `;
+        MoviePage.container.className = ""
+        MoviePage.container.className += " container moviePage my-5 p-5"
+        const execProducers = document.getElementById("media-execProducers")
         const reviews = document.getElementById("reviews")
-        const similarList = document.getElementById("similar-movies")
-        const directorName = document.getElementById("movie-director")
+        const similarList = document.getElementById("similar-medias")
+        const directorName = document.getElementById("media-director")
         const cast = document.getElementById("cast")
         const genres = document.getElementById("genres")
         const trailers = document.getElementById("trailers")
         const productionCompany = document.getElementById("production-company")
         const similarClass = document.getElementsByClassName("similar")
         const people = document.getElementsByClassName("person")
-        const type = movie.constructor.name === "TV" ? "tv" : "movie"
-
+        const type = media.constructor.name === "TV" ? "tv" : "movie"
+        const seasonsHeader = document.getElementById("seasons-header");
+        const seasons = document.getElementById("seasons");
+        const createdByHeader = document.getElementById("createdBy-header");
+        const createdBy = document.getElementById("createdBy");
+        const tvWebLink = document.getElementById("tvWebLink");
+        const networksHeader = document.getElementById("networks-header");
+        const networks = document.getElementById("networks");
         //Beginning of genre list
-        if (movie.genres.length > 0) {
-            for (const eachGenre of movie.genres) {
-                genres.innerHTML += `<li> ${eachGenre.name}</li > `
+        if (media.genres.length > 0) {
+            for (const eachGenre of media.genres) {
+                genres.innerText += ` ${eachGenre.name}`
             }
         }
         else {
-            genres.innerHTML = "<p>Unknown</p>"
+            genres.innerText += " Unknown"
         }
         //End of genre list
 
         //Beginning of Video list
-        if (movie.videos.length > 0) {
-            for (const eachTrailer of movie.videos) {
-                if (eachTrailer.type === "Trailer")
-                    trailers.innerHTML += `<li>
+        if (media.videos.length > 0) {
+            for (const eachTrailer of media.videos) {
+                console.log(eachTrailer)
+                if (eachTrailer.type === "Trailer") {
+                    trailers.innerHTML += `<li class="my-3">
     <div class="embed-responsive embed-responsive-16by9">
         <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/${eachTrailer.key}" allowfullscreen></iframe>
     </div>
                 </li > `
+                }
             }
         }
-        else {
-            trailers.innerHTML += "<p>No videos yet!</p>"
+        if (trailers.innerHTML === "") {
+            trailers.innerHTML = "<li>No trailers yet!</li>"
         }
         //End of Video list
 
         //Beginning of Production Company List
-        if (movie.productionCompanies.length > 0) {
-            for (const eachComp of movie.productionCompanies) {
+        if (media.productionCompanies.length > 0) {
+            for (const eachComp of media.productionCompanies) {
                 if (eachComp.logo_path) {
-                    productionCompany.innerHTML += `<li> <h5>${eachComp.name}</h5><img src="http://image.tmdb.org/t/p/original${eachComp.logo_path}" width=100px ></li > `
+                    productionCompany.innerHTML += `<li> <h5>${eachComp.name}</h5><img class="img-fluid my-3" src="http://image.tmdb.org/t/p/original${eachComp.logo_path}" width=100px ></li > `
 
                 } else {
                     productionCompany.innerHTML += `<li> <h5>${eachComp.name}</h5></li > `
@@ -470,48 +599,64 @@ class MovieSection {
             }
         }
         else {
-            productionCompany.innerHTML = "<p>Unknown</p>"
+            productionCompany.innerHTML = "<li>Unknown</li>"
         }
         //End of Production company list
 
-        //Beginning of Director
-        if (movie.crew.length > 0) {
-            const director = movie.crew.find(x => x.job == "Director" || x.job == "Executive Producer")
-            directorName.innerHTML = `<p class="person" id = ${director.id}> <a href="#">${director.name}</a></p > `
-        }
-        else {
-            directorName.innerHTML = "<p>Unknown</p>"
+        //Beginning of Directors
+        if (media.crew.length > 0) {
+            const directors = media.crew.filter(x => x.job == "Director")
+            if (directors.length > 0) {
+                directors.forEach(each => {
+                    each.job === "Director" ? directorName.innerHTML += `<li class="person" id=${each.id}><a href="#">${each.name}</a></li>` : ""
+                })
+            }
+            else {
+                directorName.innerHTML = "<li>Unknown</li>"
+            }
+        } else {
+            directorName.innerHTML = "<li>Unknown</li>"
         }
         //End of Director
 
+        // Beginning of Executive Producers
+        if (media.crew.length > 0) {
+            const execProducer = media.crew.filter(x => x.job == "Executive Producer")
+            if (execProducer.length > 0) {
+                execProducer.forEach(each => {
+                    each.job === "Executive Producer" ? execProducers.innerHTML += `<li class="person" id=${each.id}><a href="#">${each.name}</a></li` : ""
+                })
+            }
+            else {
+                execProducers.innerHTML = "<li>Unknown</li>"
+            }
+        }
+        else {
+            execProducers.innerHTML = "<li>Unknown</li>"
+        }
+        // End of Executive Producers
+
         // Beginning of Movie Cast
-        if (movie.cast.length > 0) {
-            movie.cast.forEach(each => {
-                cast.innerHTML += `<li class="crew" id = "${each.id}" > <a href="#">${each.name}</a> as ${each.character}</li> `
+        if (media.cast.length > 0) {
+            media.cast.forEach(each => {
+                cast.innerHTML += `<li class="person" id = "${each.id}" > <a href="#">${each.name}</a> as ${each.character}</li> `
             })
         }
         else {
-            cast.innerHTML = "<p>Unknown</p>"
-        }
-
-        for (const each of people) {
-            each.addEventListener("click", async (e) => {
-                const data = await APIService.fetchSingle("person", each.id)
-                PersonPage.renderPersonSection(data)
-            })
+            cast.innerHTML = "<li>Unknown</li>"
         }
         //End of Movie Cast
 
 
 
         //Beginning of Similar list
-        if (movie.similar.length > 0) {
-            movie.similar.map(each => {
+        if (media.similar.length > 0) {
+            media.similar.map(each => {
                 similarList.innerHTML += `<li class="similar" id = "${each.id}" path = "${each.constructor.name}" > <a href="#">${each.title || each.name}</a></li> `
             })
         }
         else {
-            similarList.innerHTML = "<p>There is nothing like it!</p>"
+            similarList.innerHTML = "<li>There is nothing like it!</li>"
         }
 
 
@@ -525,8 +670,8 @@ class MovieSection {
         //End of Similar list
 
         //Beginning of Review list
-        if (movie.reviews.length > 0) {
-            for (const eachReview of movie.reviews) {
+        if (media.reviews.length > 0) {
+            for (const eachReview of media.reviews) {
                 reviews.innerHTML += `<li>
     <h6>${eachReview.author}</h6>
     <p>${eachReview.content}</p>
@@ -534,9 +679,54 @@ class MovieSection {
             }
         }
         else {
-            reviews.innerHTML = `<p > No reviews yet!</p > `
+            reviews.innerHTML = `<li> No reviews yet!</li>`
         }
         //End of Review list
+        // Beginnig of Season List
+        if (media.seasons) {
+            seasonsHeader.innerText = "Seasons:"
+            media.seasons.forEach(season => {
+                seasons.innerHTML += `<li>${season.name} - ${season.air_date}, ${season.episode_count} episode(s).</li>`
+            })
+            // <br>${season.overview ? "Overview: " + season.overview : ""}
+        }
+        // End of Season List
+
+        // Beg. of Created By
+        if (media.createdBy) {
+            createdByHeader.innerText = "Created By:"
+            media.createdBy.forEach(creator => {
+                createdBy.innerHTML += `<li class="person" id="${creator.id}"> <a href=#> ${creator.name}</a> </li>`
+            })
+        }
+        // End of Created By
+
+        // Beg. of Tv Website Link   // <h4>Home Page</h4>
+        if (media.homePage) {
+
+            tvWebLink.innerHTML = `<li><a href=${media.homePage} target="_blank">Home Page</a></li>`;
+        }
+        // End pf Tv Website Link
+
+        //Beg. of Networks
+        if (media.networks) {
+            networksHeader.innerText = "Networks:"
+            media.networks.forEach(network => {
+                networks.innerHTML = `<li><img class="my-4" src="http://image.tmdb.org/t/p/original${network.logo_path}" width=100px ></li>`
+            })
+        }
+        // End of Networks
+
+
+
+        //Beginning of people evt list
+        for (const each of people) {
+            each.addEventListener("click", async (e) => {
+                const data = await APIService.fetchSingle("person", each.id)
+                PersonPage.renderPersonSection(data)
+            })
+        }
+        //End of people evt list
 
     }
 
@@ -547,7 +737,7 @@ class MovieSection {
 
 // Beginning of movie class
 class Movie {
-    static BACKDROP_BASE_URL = 'http://image.tmdb.org/t/p/w500';
+    static BACKDROP_BASE_URL = 'http://image.tmdb.org/t/p/w780';
 
     constructor(json) {
         this.id = json.id;
@@ -594,6 +784,7 @@ class Movie {
 
 // Beginning of tv class
 class TV {
+    static BACKDROP_BASE_URL = 'http://image.tmdb.org/t/p/w780';
     constructor(json) {
         this.id = json.id;
         this.firstAirDate = json.first_air_date
@@ -613,7 +804,7 @@ class TV {
         this.seasons = json.seasons
         this.productionCompanies = json.production_companies;
         this.language = json.original_language;
-        this.voteAvg = json.vote_average;
+        this.vote = json.vote_average;
         this.voteCount = json.vote_count;
         this.name = json.name
         this.media_type = json.media_type
@@ -672,12 +863,13 @@ class Person {
 document.addEventListener("DOMContentLoaded", App.run);
 
 
-// footer
-// style
 
-
+//resp
+//tablet col ayarla
+//tel col ayarla
+// card size
+// html comment yaz
 // parametreler için açıklama yaz
-
 // geri butonu
 // page number
-// filter bazen düzensiz veriyor
+//
